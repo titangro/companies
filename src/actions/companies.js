@@ -1,13 +1,6 @@
 import * as types from '../constants/types';
 import { createError } from './error';
 
-/*export function showCompany(user) {
-    return {
-        type: types.companies.SHOW,
-        user
-    };
-}*/
-
 export function createCompanies(url, params) {
     return dispatch => {
         return fetch(url, params)
@@ -20,4 +13,12 @@ export function createCompanies(url, params) {
             })
             .catch(err => dispatch(createError(err)));
     };
+}
+
+export function activateCompany(company) {
+    return dispatch => 
+        dispatch({
+            type: types.companies.ACTIVATE,
+            company
+        })
 }

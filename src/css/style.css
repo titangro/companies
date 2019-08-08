@@ -32,12 +32,16 @@ li a:hover {
 }
 .container {
   margin: 0 auto;
+  margin-bottom: 60px;
 }
 .wrapper {
   height: 100%;
   width: 1200px;
   margin: 0 auto;
   padding: 5px;
+}
+.wrapper .row {
+  margin-bottom: 10px;
 }
 
 

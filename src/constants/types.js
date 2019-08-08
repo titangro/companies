@@ -6,6 +6,7 @@ export const app = {
 
 export const companies = {
     CREATE: 'companies/companies/create',
+    ACTIVATE: 'companies/companies/activate'
 }
 
 export const data = {

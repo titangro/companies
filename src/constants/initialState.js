@@ -1,5 +1,6 @@
 export default {
     error: null,
     loading: false,
-    companies: []
+    companies: [],
+    company: null
 }
