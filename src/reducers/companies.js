@@ -25,3 +25,25 @@ export function company(state = initialState.company, action) {
             return state;
     }
 }
+
+export function managers(state = initialState.managers, action) {
+    switch (action.type) {
+        case types.companies.SHOW_MANAGERS: {
+            const { managers } = action;
+            let nextState = managers;
+            return nextState;
+        }
+        case types.companies.ADD_MANAGER: {
+            const { manager, companyId } = action;
+            if (localStorage.managers) {
+                localStorage.managers[companyId] = JSON.stringify([manager]);
+            } else {
+                localStorage.managers = JSON.stringify([...JSON.parse(localStorage.managers)[companyId], manager]);
+            }
+            let nextState = [...state, manager];
+            return nextState;
+        }
+        default:
+            return state;
+    }
+}

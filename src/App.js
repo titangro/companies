@@ -4,7 +4,8 @@ import PropTypes from 'prop-types';
 import { Button, Container, Row, Col, Form } from 'react-bootstrap';
 
 import { connect } from 'react-redux';
-import { createCompanies, activateCompany } from './actions/companies';
+import { createCompanies, activateCompany, showManagers, addManager } from './actions/companies';
+import { createError, deleteError } from './actions/error';
 
 class App extends Component {
 
@@ -33,16 +34,71 @@ class App extends Component {
     this.props.activateCompany(company);
   }
 
-  handleSubmit(event) {
+  handleSubmit(event, companyId) {
     event.preventDefault();
-    const formData = new FormData(event.target);
-    if (this.validateForm(formData)) {
-      console.log('isValid')
+    if (this.validateForm(event.target)) {
+      console.log('isValid');
+
+      const formData = new FormData(event.target);
+      const name = formData.get('name'),
+        surname = formData.get('surname'),
+        patronymic = formData.get('patronymic'),
+        passport = formData.get('passport'),
+        issue = formData.get('issue'),
+        issueDate = new Date(formData.get('issue_date')),
+        bornDate = new Date(formData.get('born_date')),
+        inn = formData.get('inn');
+      
+      this.props.addManager(companyId, {
+        name: `${name} ${surname} ${patronymic}`,
+        passport: passport,
+        issue: issue,
+        issueDate: issueDate,
+        bornDate: bornDate,
+        inn: inn
+      });
     }
   }
 
   validateForm(form) {
-    console.log(form);
+    const formData = new FormData(form);
+    const name = formData.get('name'),
+      surname = formData.get('surname'),
+      patronymic = formData.get('patronymic'),
+      passport = formData.get('passport'),
+      issue = formData.get('issue'),
+      issueDate = new Date(formData.get('issue_date')),
+      bornDate = new Date(formData.get('born_date')),
+      inn = formData.get('inn');
+
+    if (name === '' || surname === '' || patronymic === '' || passport === '' || issue === '' || issueDate === '' || bornDate === '' || inn === '') {
+      this.props.createError('Все поля обязательны для заполнения');
+      return false;
+    } else {
+
+      if (passport.length !== 11) {
+        this.props.createError('Некорректно заполенно поле серии и номера паспорта');
+        return false;
+      } else if (inn.length !== 12) {
+        this.props.createError('Поле ИНН должно содержать не менее 12 цифр');
+        return false;
+      } else if (issueDate > new Date() || bornDate > issueDate) {
+        this.props.createError('Некорректно заполенно поле даты выдачи паспорта');
+        return false;
+      } else if (bornDate > new Date()) {
+        this.props.createError('Некорректно заполенно поле даты рождения');
+        return false;
+      } else if ( ((new Date()).getFullYear() - bornDate.getFullYear()) < 18 
+          || (((new Date()).getFullYear() - bornDate.getFullYear()) === 18 && ((new Date()).getMonth() - bornDate.getMonth() < 0 )) 
+          || (((new Date()).getFullYear() - bornDate.getFullYear()) === 18 && ((new Date()).getMonth() - bornDate.getMonth()) === 0 && ((new Date()).getDate() - bornDate.getDate() < 0) ) ) {
+        this.props.createError('Учредитель не можеть быть несовершеннолетним');
+        return false;
+      }
+
+      this.props.deleteError();
+      return true;
+    }
+    return false;
   }
 
   handleFio(node) {
@@ -51,28 +107,28 @@ class App extends Component {
   }
 
   handlePassportNumber(node) {
-    console.log(node.value.length)
-    if (node.value.replace(/[^\d]/g,'').length > 10)
-      node.value = node.value.slice(0, 10);
-    if (node.value.length === 4)
-      return node.value += ' ';
-    node.value = node.value.replace(/[^\d ]/g,'');
+    if (node.value.length < 4)
+      node.value = [...node.value.slice(0,4).replace(/[^0-9]/gim,'')].join('');
+    else if (node.value.length === 4)
+      node.value = [...node.value.slice(0,4).replace(/[^0-9]/gim,''), ' '].join('');
+    else
+      node.value = [...node.value.slice(0,4).replace(/[^0-9]/gim,''), ' ', ...node.value.slice(5, 11).replace(/[^0-9]/gim,'')].join('');    
   }
 
   handlePassportIssue(node) {
-
+    node.value = node.value.replace(/[!@#~`$%^&";:?*\/\\\[\]\|\{\}.,_\+\=-]/g, '')
   }
 
   handlePassportDate(node) {
-
+    //console.log(node.value)
   }
 
   handleBornDate(node) {
-
+    //console.log(node.value)
   }
 
   handleInn(node) {
-
+    node.value = node.value.replace(/[^0-9]/gim,'').slice(0,12);
   }
 
   render() {
@@ -133,7 +189,7 @@ class App extends Component {
             </Container>
             <Container className="personal">
               <h2>Добавить информамцию о учередителях</h2>
-              <Form onSubmit={this.handleSubmit}>
+              <Form onSubmit={(event) => this.handleSubmit(event, this.props.company.data.hid)}>
                 <Form.Group controlId="formBasicCompany">
                   <Form.Label>Компания</Form.Label>
                   <Form.Control type="text" name="company" placeholder="Ваша компания" value={this.props.company.value} onChange={() => {}} />
@@ -166,6 +222,9 @@ class App extends Component {
 
                 <Form.Group controlId="formBasicPassportDateIssue">
                   <Form.Control type="date" name="issue_date" placeholder="Даты выдачи" onChange={(event) => this.handlePassportDate(event.target)} />
+                  <Form.Text className="text-muted">
+                    Даты выдачи
+                  </Form.Text>
                 </Form.Group>
 
                 <Form.Group controlId="formBasicPassport">
@@ -208,7 +267,11 @@ const mapStateToProps = (state) => {
 const mapDispatchToProps = (dispatch) => {
   return {
     fetchData: (url, params) => dispatch(createCompanies(url, params)),
-    activateCompany: (company) => dispatch(activateCompany(company))
+    activateCompany: (company) => dispatch(activateCompany(company)),
+    createError: (error, info) => dispatch(createError(error, info)),
+    deleteError: () => dispatch(deleteError()),
+    showManagers: (managers) => dispatch(showManagers(managers)),
+    addManager: (companyId, manager) => dispatch(addManager(companyId, manager))
   };
 };
 
