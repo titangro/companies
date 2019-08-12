@@ -32,6 +32,7 @@ class App extends Component {
     );
     event.target.classList.add('active');
     this.props.activateCompany(company);
+    this.props.showManagers(company);
   }
 
   handleSubmit(event, companyId) {
@@ -50,7 +51,7 @@ class App extends Component {
         inn = formData.get('inn');
       
       this.props.addManager(companyId, {
-        name: `${name} ${surname} ${patronymic}`,
+        name: `${surname} ${name} ${patronymic}`,
         passport: passport,
         issue: issue,
         issueDate: issueDate,
@@ -98,7 +99,6 @@ class App extends Component {
       this.props.deleteError();
       return true;
     }
-    return false;
   }
 
   handleFio(node) {
@@ -141,7 +141,7 @@ class App extends Component {
             {this.props.companies.map(
               company =>
               <Row key={company.data.inn}>
-                <Col xs lg="2">
+                <Col xs lg="6">
                   <Button variant="light" onClick={event => this.handleCompany(event, company)}>{company.value}</Button>
                 </Col>
               </Row>
@@ -151,35 +151,34 @@ class App extends Component {
           <React.Fragment>
             <Container className="personal">
               <h2>Учредители</h2>
-              {this.props.company.managers ? 
+              {this.props.managers.length ? 
                 <React.Fragment>
-                  {this.props.company.managers.map(
+                  {this.props.managers.map(
                     (manager, index) =>
                     <Container key={index}>
                       <Row>
-                        <Col xs lg="2">
+                        <Col xs lg="6">
                           {manager.name}
                         </Col>
                       </Row>
                       <Row>
-                        <p>Папорт</p>
-                        <Col xs lg="2">
-                          Серия номер: {manager.passport}
+                        <Col xs lg="6">
+                          Серия номер паспорта: {manager.passport}
                         </Col>
-                        <Col xs lg="2">
-                          Кем выдан: {manager.passportIssue}
+                        <Col xs lg="6">
+                          Кем выдан: {manager.issue}
                         </Col>
-                        <Col xs lg="2">
-                          Дата выдачи: {manager.passprotIssueDate}
-                        </Col>
-                      </Row>
-                      <Row>
-                        <Col xs lg="2">
-                          Дата рождения: {manager.bornDate}
+                        <Col xs lg="6">
+                          Дата выдачи: {(new Date(manager.issueDate)).toLocaleDateString()}
                         </Col>
                       </Row>
                       <Row>
                         <Col xs lg="2">
+                          Дата рождения: {(new Date(manager.bornDate)).toLocaleDateString()}
+                        </Col>
+                      </Row>
+                      <Row>
+                        <Col xs lg="6">
                           ИНН: {manager.inn}
                         </Col>
                       </Row>
@@ -188,65 +187,69 @@ class App extends Component {
                 </React.Fragment> : <p>В компании нет информации об учредителях</p>}
             </Container>
             <Container className="personal">
-              <h2>Добавить информамцию о учередителях</h2>
-              <Form onSubmit={(event) => this.handleSubmit(event, this.props.company.data.hid)}>
-                <Form.Group controlId="formBasicCompany">
-                  <Form.Label>Компания</Form.Label>
-                  <Form.Control type="text" name="company" placeholder="Ваша компания" value={this.props.company.value} onChange={() => {}} />
-                  <Form.Text className="text-muted">
-                    Выбранная компания
-                  </Form.Text>
-                </Form.Group>
+              <Row>
+                <Col xs lg="6">
+                  <h2>Добавить информамцию о учередителях</h2>              
+                  <Form onSubmit={(event) => this.handleSubmit(event, this.props.company.data.hid)}>
+                    <Form.Group controlId="formBasicCompany">
+                      <Form.Label>Компания</Form.Label>
+                      <Form.Control type="text" name="company" placeholder="Ваша компания" value={this.props.company.value} onChange={() => {}} />
+                      <Form.Text className="text-muted">
+                        Выбранная компания
+                      </Form.Text>
+                    </Form.Group>
 
-                <Form.Group controlId="formBasicSurname">
-                  <Form.Label>Фамилия Имя Отчество</Form.Label>
-                  <Form.Control type="text" name="surname" placeholder="Фамилия" onChange={(event) => this.handleFio(event.target)} />
-                </Form.Group>
+                    <Form.Group controlId="formBasicSurname">
+                      <Form.Label>Фамилия Имя Отчество</Form.Label>
+                      <Form.Control type="text" name="surname" placeholder="Фамилия" onChange={(event) => this.handleFio(event.target)} />
+                    </Form.Group>
 
-                <Form.Group controlId="formBasicName">
-                  <Form.Control type="text" name="name" placeholder="Имя" onChange={(event) => this.handleFio(event.target)} />
-                </Form.Group>
+                    <Form.Group controlId="formBasicName">
+                      <Form.Control type="text" name="name" placeholder="Имя" onChange={(event) => this.handleFio(event.target)} />
+                    </Form.Group>
 
-                <Form.Group controlId="formBasicPatronymic">
-                  <Form.Control type="text" name="patronymic" placeholder="Отчество" onChange={(event) => this.handleFio(event.target)} />
-                </Form.Group>
+                    <Form.Group controlId="formBasicPatronymic">
+                      <Form.Control type="text" name="patronymic" placeholder="Отчество" onChange={(event) => this.handleFio(event.target)} />
+                    </Form.Group>
 
-                <Form.Group controlId="formBasicPassport">
-                  <Form.Label>Паспортные данные</Form.Label>
-                  <Form.Control type="text" name="passport" placeholder="Серия и номер" onChange={(event) => this.handlePassportNumber(event.target)} />
-                </Form.Group>
+                    <Form.Group controlId="formBasicPassport">
+                      <Form.Label>Паспортные данные</Form.Label>
+                      <Form.Control type="text" name="passport" placeholder="Серия и номер" onChange={(event) => this.handlePassportNumber(event.target)} />
+                    </Form.Group>
 
-                <Form.Group controlId="formBasicPassportIssue">
-                  <Form.Control type="text" name="issue" placeholder="Кем выдан" onChange={(event) => this.handlePassportIssue(event.target)} />
-                </Form.Group>
+                    <Form.Group controlId="formBasicPassportIssue">
+                      <Form.Control type="text" name="issue" placeholder="Кем выдан" onChange={(event) => this.handlePassportIssue(event.target)} />
+                    </Form.Group>
 
-                <Form.Group controlId="formBasicPassportDateIssue">
-                  <Form.Control type="date" name="issue_date" placeholder="Даты выдачи" onChange={(event) => this.handlePassportDate(event.target)} />
-                  <Form.Text className="text-muted">
-                    Даты выдачи
-                  </Form.Text>
-                </Form.Group>
+                    <Form.Group controlId="formBasicPassportDateIssue">
+                      <Form.Control type="date" name="issue_date" placeholder="Даты выдачи" onChange={(event) => this.handlePassportDate(event.target)} />
+                      <Form.Text className="text-muted">
+                        Даты выдачи
+                      </Form.Text>
+                    </Form.Group>
 
-                <Form.Group controlId="formBasicPassport">
-                  <Form.Label>Дата рождения</Form.Label>
-                  <Form.Control type="date" name="born_date" placeholder="" onChange={(event) => this.handleBornDate(event.target)} />
-                </Form.Group>
+                    <Form.Group controlId="formBasicPassport">
+                      <Form.Label>Дата рождения</Form.Label>
+                      <Form.Control type="date" name="born_date" placeholder="" onChange={(event) => this.handleBornDate(event.target)} />
+                    </Form.Group>
 
-                <Form.Group controlId="formBasicPassport">
-                  <Form.Label>ИНН</Form.Label>
-                  <Form.Control type="text" name="inn" placeholder="" onChange={(event) => this.handleInn(event.target)} />
-                </Form.Group>
-                
-                <Form.Group controlId="formBasicError">
-                  <Form.Control.Feedback type="invalid" style={{display: this.props.error ? 'block' : 'none'}}>
-                    {this.props.error}
-                  </Form.Control.Feedback>
-                </Form.Group>
+                    <Form.Group controlId="formBasicPassport">
+                      <Form.Label>ИНН</Form.Label>
+                      <Form.Control type="text" name="inn" placeholder="" onChange={(event) => this.handleInn(event.target)} />
+                    </Form.Group>
+                    
+                    <Form.Group controlId="formBasicError">
+                      <Form.Control.Feedback type="invalid" style={{display: this.props.error ? 'block' : 'none'}}>
+                        {this.props.error}
+                      </Form.Control.Feedback>
+                    </Form.Group>
 
-                <Button variant="primary" type="submit">
-                  Добавить учредителя
-                </Button>
-              </Form>
+                    <Button variant="primary" type="submit">
+                      Добавить учредителя
+                    </Button>
+                  </Form>
+                </Col>
+              </Row>
             </Container>
           </React.Fragment> : ''}
         </React.Fragment> : ''}
@@ -260,7 +263,8 @@ const mapStateToProps = (state) => {
       error: state.error,
       loading: state.loading,
       companies: state.companies,
-      company: state.company
+      company: state.company,
+      managers: state.managers
   };
 };
 
@@ -270,7 +274,7 @@ const mapDispatchToProps = (dispatch) => {
     activateCompany: (company) => dispatch(activateCompany(company)),
     createError: (error, info) => dispatch(createError(error, info)),
     deleteError: () => dispatch(deleteError()),
-    showManagers: (managers) => dispatch(showManagers(managers)),
+    showManagers: (company) => dispatch(showManagers(company)),
     addManager: (companyId, manager) => dispatch(addManager(companyId, manager))
   };
 };

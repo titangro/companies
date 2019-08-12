@@ -29,16 +29,23 @@ export function company(state = initialState.company, action) {
 export function managers(state = initialState.managers, action) {
     switch (action.type) {
         case types.companies.SHOW_MANAGERS: {
-            const { managers } = action;
-            let nextState = managers;
+            const { company } = action;
+            let nextState = company.data.managers ? company.data.managers : [];
+            let parsedManagers = localStorage.managers ? JSON.parse(localStorage.managers) : [];
+            parsedManagers = parsedManagers[company.data.hid] ? parsedManagers[company.data.hid] : [];
+            nextState = [...nextState, ...parsedManagers];
             return nextState;
         }
         case types.companies.ADD_MANAGER: {
             const { manager, companyId } = action;
-            if (localStorage.managers) {
-                localStorage.managers[companyId] = JSON.stringify([manager]);
+            if (!localStorage.managers) {
+                let companyManager = {};
+                companyManager[companyId] = [manager];
+                localStorage.managers = JSON.stringify(companyManager);
             } else {
-                localStorage.managers = JSON.stringify([...JSON.parse(localStorage.managers)[companyId], manager]);
+                let managers = JSON.parse(localStorage.managers);
+                managers[companyId] = [...managers[companyId], manager];
+                localStorage.managers = JSON.stringify(managers);
             }
             let nextState = [...state, manager];
             return nextState;

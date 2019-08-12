@@ -23,18 +23,18 @@ export function activateCompany(company) {
         })
 }
 
-export function showManagers(managers) {
+export function showManagers(company) {
     return dispatch => 
         dispatch({
             type: types.companies.SHOW_MANAGERS,
-            managers
+            company
         })
 }
 
 export function addManager(companyId, manager) {
     return dispatch => 
         dispatch({
-            type: types.companies.ADD_MANAGERS,
+            type: types.companies.ADD_MANAGER,
             manager,
             companyId
         })
