@@ -6,7 +6,6 @@
   "dependencies": {
     "bootstrap": "^4.3.1",
     "environs": "0.4.5",
-    "gh-pages": "^2.0.1",
     "lodash": "^4.17.14",
     "react": "^16.3.2",
     "react-bootstrap": "^1.0.0-beta.10",
@@ -45,6 +44,7 @@
     "eslint-config-prettier": "4.0.0",
     "eslint-plugin-jest": "22.2.2",
     "eslint-plugin-react": "7.12.4",
+    "gh-pages": "^2.1.1",
     "redux-devtools": "^3.5.0",
     "tsconfig-paths-webpack-plugin": "3.2.0",
     "typescript": "3.2.1"
